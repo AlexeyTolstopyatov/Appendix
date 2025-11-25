@@ -21,5 +21,6 @@ type AxAbstractOperator<'TObject, 'TResult>() =
     /// Abstract member must be documented and returned 
     /// declaration of expected implementing operator
     /// 
-    /// <c>Per(x): \mathbb{L} \Rightarrow \mathbb{R}</c>
+    /// <c>perm: \mathbb{L} \longmapsto \mathbb{R}</c>
+    /// <c>Per: \mathbb{L} \longmapsto \mathbb{R}</c>
     abstract member abstractDecl : string

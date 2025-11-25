@@ -1,6 +1,20 @@
 ﻿namespace Appendix.Math.Functions
-
+open Appendix.Math.Base
+/// In mathematics, the derivative is a fundamental tool 
+/// that quantifies the sensitivity to change of a function's output 
+/// with respect to its input. The derivative of a function of a 
+/// single variable at a chosen input value, when it exists, 
+/// is the slope of the tangent line to the graph of the function at that point. 
+/// 
+/// The tangent line is the best linear approximation of 
+/// the function near that input value. 
+/// The derivative is often described as the instantaneous rate of change, 
+/// the ratio of the instantaneous change in the dependent variable 
+/// to that of the independent variable. 
+/// 
+/// The process of finding a derivative is called differentiation.
 module AxDifferentiation =
+
     [<CompiledName("Define")>]
     let rec define x expr =
         match expr with
@@ -69,5 +83,11 @@ module AxDifferentiation =
         | Subtract (u, v) -> Subtract (simplify u, simplify v)
         // Basic expr 
         | e -> e
-    let rec simplifyFraction f =
-        ()
+[<Class>]
+type AxSymbolicDerivative() = 
+    inherit AxAbstractSymbolicOperator()
+    override this.define(x: string, expr: AxExpression): AxExpression =
+        failwith "Not Implemented"
+    
+    override this.simplify(arg1: AxExpression): AxExpression =
+        failwith "Not Implemented"

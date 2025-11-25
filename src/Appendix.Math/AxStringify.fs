@@ -2,7 +2,7 @@ namespace Appendix.Math
 
 module AxStringify =
     open Appendix.Math.Functions
-
+    open Appendix.Math.Base
     [<CompiledName "ToString">]
     let rec toString expr =
         match expr with

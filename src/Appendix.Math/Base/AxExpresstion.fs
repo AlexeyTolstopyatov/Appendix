@@ -1,4 +1,4 @@
-﻿namespace Appendix.Math.Functions
+﻿namespace Appendix.Math.Base
 
 type public AxExpression =
     | Number of float
