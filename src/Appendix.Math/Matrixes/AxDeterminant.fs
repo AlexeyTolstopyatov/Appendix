@@ -61,9 +61,32 @@ type AxDeterminantOperator(d: double[,]) =
                 return Array.sum results
         }
     let mutable _result: Task<double> = detAsync(d)
-    override this.get =
+    /// In mathematics, the determinant is a scalar-valued function of the entries of a square matrix. 
+    /// The determinant of a matrix A is commonly denoted det(A), det A, or |A|. 
+    /// Its value characterizes some properties of the matrix and 
+    /// the linear map represented, on a given basis, by the matrix. 
+    /// 
+    /// In particular, the determinant is nonzero 
+    /// if and only if the matrix is invertible and the corresponding 
+    /// linear map is an isomorphism. 
+    /// 
+    /// However, if the determinant is zero, 
+    /// the matrix is referred to as singular, meaning it does not have an inverse.
+    override _.get =
         _result.Result
+    /// In mathematics, the determinant is a scalar-valued function of the entries of a square matrix. 
+    /// The determinant of a matrix A is commonly denoted det(A), det A, or |A|. 
+    /// Its value characterizes some properties of the matrix and 
+    /// the linear map represented, on a given basis, by the matrix. 
+    /// 
+    /// In particular, the determinant is nonzero 
+    /// if and only if the matrix is invertible and the corresponding 
+    /// linear map is an isomorphism. 
+    /// 
+    /// However, if the determinant is zero, 
+    /// the matrix is referred to as singular, meaning it does not have an inverse.
     override this.latex(obj: string) =
         $@"\det{{{obj}}} = {this.get}"
+    /// Prints the declaration of current linear operator
     override this.abstractDecl =
         @"\det : L \longmapsto \mathbb{R}"
