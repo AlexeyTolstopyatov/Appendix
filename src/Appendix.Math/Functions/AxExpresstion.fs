@@ -1,4 +1,4 @@
-﻿namespace Appendix.Math
+﻿namespace Appendix.Math.Functions
 
 type public AxExpression =
     | Number of float
@@ -14,5 +14,3 @@ type public AxExpression =
     | Exp of AxExpression
     | Ln of AxExpression
     | Neg of AxExpression
-type public AxIntegersMatrix = int32[,]
-type public AxFloatingMatrix = float[,]

@@ -1,14 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <Compile Include="AxDeterminant.fs" />
-        <Compile Include="AxExpresstion.fs" />
-        <Compile Include="AxDifferentiation.fs" />
-    </ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Base\AxAbstractOperator.fs" />
+    <Compile Include="Functions\AxExpresstion.fs" />
+    <Compile Include="Functions\AxDifferentiation.fs" />
+    <Compile Include="Functions\AxIndefiniteIntegration.fs" />
+    <Compile Include="Matrixes\AxMatrixTypes.fs" />
+    <Compile Include="Matrixes\AxDeterminant.fs" />
+    <Compile Include="Matrixes\AxPermanent.fs" />
+    <Compile Include="Matrixes\AxTrace.fs" />
+    <Compile Include="AxStringify.fs" />
+  </ItemGroup>
 </Project>

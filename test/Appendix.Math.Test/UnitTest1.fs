@@ -1,6 +1,7 @@
 module Appendix.Math.Test
 
 open NUnit.Framework
+open Appendix.Math.Functions
 
 [<SetUp>]
 let Setup () =
@@ -17,20 +18,21 @@ let checkSumOfFunctionsSameNature () =
                     |> Add
                     |> AxDifferentiation.define "x"
                     |> AxDifferentiation.simplify
-                    |> AxDifferentiation.toString
+                    |> AxStringify.toString
     Assert.Pass 
 ///
 /// Get the derivative function df(x)/dx from
 /// parts of sum which are different nature
 /// f(x) = P_n(x) + th(x)
+/// 
 [<Test>]
 let checkSumOfFunctionsDifferentNature () =
     let x = Variable "x"
     let f = (Power (x, Number 3.0), Sin x)
                     |> Add
-                    |> AxDifferentiation.define "x" // implicit set "dx"
+                    |> AxDifferentiation.define "x" // explicit set "dx"
                     |> AxDifferentiation.simplify
-                    |> AxDifferentiation.toString
+                    |> AxStringify.toString
                  // |> Console.WriteLine
     
     Assert.Pass()

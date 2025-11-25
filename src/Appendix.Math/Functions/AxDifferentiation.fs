@@ -1,7 +1,6 @@
-﻿namespace Appendix.Math
+﻿namespace Appendix.Math.Functions
 
 module AxDifferentiation =
-
     [<CompiledName("Define")>]
     let rec define x expr =
         match expr with
@@ -47,7 +46,6 @@ module AxDifferentiation =
         | Power (_, Number 0.0) -> Number 1.0
         | Neg (Neg e) -> simplify e
         | Neg (Number n) -> Number (-n)
-        
         // Expression Simplification
         | Add (u, v) -> 
             match (simplify u, simplify v) with
@@ -61,7 +59,6 @@ module AxDifferentiation =
             match (simplify u, simplify v) with
             | Number a, Number b -> Number (a ** b)
             | su, sv -> Power (su, sv)
-        
         // Simplification
         | Sin e -> Sin (simplify e)
         | Cos e -> Cos (simplify e)
@@ -70,7 +67,6 @@ module AxDifferentiation =
         | Neg e -> Neg (simplify e)
         | Divide (u, v) -> Divide (simplify u, simplify v)
         | Subtract (u, v) -> Subtract (simplify u, simplify v)
-        
         // Basic expr 
         | e -> e
     let rec simplifyFraction f =
