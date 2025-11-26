@@ -5,14 +5,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Base\AxExpresstion.fs" />
-    <Compile Include="Base\AxAbstractOperator.fs" />
+    <Compile Include="Base\AbstractMathOperator.fs" />
     <Compile Include="Base\AxAbstractSymbolicOperator.fs" />
     <Compile Include="Functions\AxDifferentiation.fs" />
     <Compile Include="Functions\AxIndefiniteIntegration.fs" />
-    <Compile Include="Matrixes\AxMatrixTypes.fs" />
-    <Compile Include="Matrixes\AxDeterminant.fs" />
-    <Compile Include="Matrixes\AxPermanent.fs" />
-    <Compile Include="Matrixes\AxTrace.fs" />
+    <Compile Include="Functions\Applications.fs" />
+    <Compile Include="Matrixes\Applications.fs" />
     <Compile Include="AxStringify.fs" />
   </ItemGroup>
 </Project>

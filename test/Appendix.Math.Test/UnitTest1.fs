@@ -45,6 +45,22 @@ let checkDerivativeOfDifferentAlgebraicFunctions () =
 [<Test>]
 let checkPermanentOf2x2E () = 
     let mat = array2D [ [ 1.0; 0.0]; [0.0; 1.0] ]
-    let perm = AxPermanentOperator(mat).latex("E")
+    let perm = mat |> Applications.permanentOperator.Compute
 
-    Assert.Pass perm
+    Assert.Pass $"perm(E) = {perm}"
+[<Test>]
+let checkDeterminantOf2x2E () = 
+    let mat = array2D [ [ 1.0; 0.0]; [0.0; 1.0] ]
+    let det = Applications.determinantOperator.Compute mat
+
+    Assert.Pass $"det(E) = {det}"
+
+[<Test>]
+let checkApplicationsOf2x2Mat () = 
+    let mat = array2D [ [2.0; 8.0]; [3.0; 0.0] ]
+    // det(A) = -24 expected
+    // per(A) = +24 expected
+    let perm = Applications.permanentOperator.Compute mat
+    let det = Applications.determinantOperator.Compute mat
+
+    Assert.Pass $"perm(A) = {perm}\r\ndet(A) = {det}"

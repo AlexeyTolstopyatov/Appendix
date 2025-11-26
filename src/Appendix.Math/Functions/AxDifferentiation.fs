@@ -14,7 +14,6 @@ open Appendix.Math.Base
 /// 
 /// The process of finding a derivative is called differentiation.
 module AxDifferentiation =
-
     [<CompiledName("Define")>]
     let rec define x expr =
         match expr with
@@ -83,11 +82,3 @@ module AxDifferentiation =
         | Subtract (u, v) -> Subtract (simplify u, simplify v)
         // Basic expr 
         | e -> e
-[<Class>]
-type AxSymbolicDerivative() = 
-    inherit AxAbstractSymbolicOperator()
-    override this.define(x: string, expr: AxExpression): AxExpression =
-        failwith "Not Implemented"
-    
-    override this.simplify(arg1: AxExpression): AxExpression =
-        failwith "Not Implemented"
