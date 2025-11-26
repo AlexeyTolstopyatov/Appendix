@@ -140,7 +140,7 @@ let permanentOperator : MathOperator<double[,], double> = {
                             let sign = if col % 2 = 0 then 1.0 else -1.0
                             sign * mat[0, col] * per minor))
 
-                let! results = Task.WhenAll(tasks)
+                let! results = Task.WhenAll tasks
                 return Array.sum results 
         }
         result.Result // :D!
@@ -231,8 +231,7 @@ let private makeRowsEchelon (matrix: double[,]) : double[,] * int[] =
 let private computeKernel (matrix: double[,]) : KernelStep list * KernelSolution =
     let m = matrix.GetLength 0
     let n = matrix.GetLength 1
-    
-    // 
+
     let rowsEchelon, pivotCols = makeRowsEchelon matrix
     
     // variables what are will be freed 
@@ -294,6 +293,7 @@ let private computeKernel (matrix: double[,]) : KernelStep list * KernelSolution
 /// the kernel is always a linear subspace of the domain. That is, given a linear map L : V → W 
 /// between two vector spaces V and W, the kernel of L is the vector space of all elements v of V 
 /// such that L(v) = 0, where 0 denotes the zero vector in W, or more symbolically:
+///     Ker(A) = {x | A*x = 0}
 [<CompiledName "KernelOperator">]
 let kernelOperator : SymbolicMathOperator<double[,], KernelStep, KernelSolution> = {
     Steps = fun matrix -> 
@@ -319,29 +319,101 @@ let kernelOperator : SymbolicMathOperator<double[,], KernelStep, KernelSolution>
             steps 
             |> List.map (fun step ->
                 match step with
-                | InitialMatrix m -> 
-                    $@"{name} = {matrixToString m}"
-                
-                | RowReduction (m, desc) -> 
-                    $@"{{\text{{{desc}}}}} {matrixToString m}"
-                
+                | InitialMatrix m -> $@"{name} = {matrixToString m}"
+                | RowReduction (m, desc) -> $@"\text{{ {desc} }} {matrixToString m}"
                 | BasisIdentification (vectors, vars) ->
                     let basisText = 
                         vectors 
                         |> Array.mapi (fun i v ->
-                            $@"\vec{{v_{{{i + 1}}} = {vectorToString v}")
+                            $@"c_{i + 1} = {vectorToString v}")
                         |> String.concat ",\\quad "
-                    $"\\text{{Basis of \\text{{Mat}}{name}}}: \n{basisText}"
-                
+                    $"\\text{{Basis of {name} }}: \n{basisText}"
                 | FinalBasis basis ->
                     let basisLatex = 
                         basis 
                         |> Array.mapi (fun i vec ->
-                            $@"\beta_{{{i + 1}}} \cdot {vectorToString vec}")
+                            $@"t_{{{i + 1}}} \cdot {vectorToString vec}")
                         |> String.concat " + "
-                    $@"\ker({name}) = \left\{{ {basisLatex} \mid t_i \in \mathbb{{R}} \right\}}"
+                    $@"\ker {name} = {basisLatex}, t_i \in \mathbb{{R}}"
             )
         String.concat " \\\\ \n" stepTexts
     
     Declare = @"\ker : \mathbb{R}^{m \times n} \to \mathbb{R}^n"
+}
+
+type ImageStep =
+    | InitialMatrix of double[,]
+    | ColumnSpace of double[][]
+    | BasisExtraction of double[][]
+    | FinalImageBasis of double[][]
+
+type ImageSolution = {
+    Basis: double[][]
+    Rank: int
+    Dimension: int
+}
+
+let private vectorsToString (vectors: double[][]) =
+    vectors 
+    |> Array.mapi (fun i vec -> $@"c_{i + 1} = {vectorToString vec}")
+    |> String.concat ",\\quad "
+
+// (Image/Column Space)
+[<CompiledName "ImageOperator">]
+let imageOperator : SymbolicMathOperator<double[,], ImageStep, ImageSolution> = {
+    Steps = fun matrix ->
+        let m = matrix.GetLength(0)
+        
+        let rrefMatrix, pivotCols = makeRowsEchelon matrix
+        
+        let basis = pivotCols
+                    |> Array.map (fun colIdx ->
+                        Array.init m (fun row -> matrix.[row, colIdx])
+                    )
+        
+        [
+            InitialMatrix matrix
+            ColumnSpace basis
+            BasisExtraction basis
+            FinalImageBasis basis
+        ]
+    
+    Result = fun steps ->
+        let finalStep = steps |> List.last
+        match finalStep with
+        | FinalImageBasis basis ->
+            { 
+                Basis = basis
+                Rank = basis.Length
+                Dimension = basis.Length
+            }
+        | _ -> failwith "Invalid steps"
+    
+    ToString = fun steps name ->
+        let stepTexts =
+            steps 
+            |> List.map (fun step ->
+                match step with
+                | InitialMatrix m -> 
+                    $@"{name} = {matrixToString m}"
+                
+                | ColumnSpace basis ->
+                    $@"\text{{Columns set: }} {vectorsToString basis}"
+                
+                | BasisExtraction basis ->
+                    let basisText = vectorsToString basis
+                    $@"\text{{Image's basis: }} {basisText}"
+                
+                | FinalImageBasis basis ->
+                    let basisLatex = 
+                        basis 
+                        |> Array.mapi (fun i vec -> $@"s_{{{i + 1}}} \cdot {vectorToString vec}")
+                        |> String.concat " + "
+                    $@"\text{{im}} {name} = {basisLatex}, s_i \in \mathbb{{R}}"
+            )
+
+        String.concat " \\\\ \n" stepTexts
+    
+    Declare = 
+        @"\text{im} : \mathbb{R}^{m \times n} \to \mathbb{R}^m"
 }

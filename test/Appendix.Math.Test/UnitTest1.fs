@@ -68,11 +68,36 @@ let checkApplicationsOf2x2Mat () =
 
 [<Test>]
 let checkNullityOf () =
-    let matrix = array2D [[1.0; 2.0; 3.0]; [4.0; 5.0; 6.0]; [0.0; 0.0; 0.0]]
+    let matrix = array2D [[1.0; 2.0; 1.0]; [2.0; 4.0; 2.0]]
+
+    let steps = Applications.kernelOperator.Steps matrix
+    let solution = Applications.kernelOperator.Result steps
+    let latex = Applications.kernelOperator.ToString steps "A"
+    
+    printfn "%A" solution
+    Assert.Pass latex
+
+[<Test>]
+let checkImageOf () =
+    let matrix = array2D [[1.0; 2.0; 1.0]; [2.0; 4.0; 2.0]]
+
+    let steps = Applications.imageOperator.Steps matrix
+    let solution = Applications.imageOperator.Result steps
+    let latex = Applications.imageOperator.ToString steps "A"
+    
+    printfn "%A" solution
+    Assert.Pass latex
+
+[<Test>]
+let checkUndefinedNullity () = 
+    let matrix = array2D [
+        [1.0; 2.0; 1.0]; 
+        [0.0; 0.0; 2.0]
+    ]
+
     let steps = Applications.kernelOperator.Steps matrix
     let solution = Applications.kernelOperator.Result steps
     let latex = Applications.kernelOperator.ToString steps "A"
 
-    //printfn "Решение: %A" solution
     printfn "%A" solution
     Assert.Pass latex
