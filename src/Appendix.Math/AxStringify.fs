@@ -23,7 +23,7 @@ module AxStringify =
         | Fraction (e1, e2) -> $"({toString e1}/{toString e2})"
 
     [<CompiledName "TexString">]
-    let rec texString(expr: AxExpression) =
+    let rec texString(expr: SymbolicExpression) =
         match expr with
         | Number n -> 
             if n % 1.0 = 0.0 then string (int n)

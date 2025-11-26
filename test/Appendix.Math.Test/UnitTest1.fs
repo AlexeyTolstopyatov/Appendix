@@ -1,6 +1,7 @@
 module Appendix.Math.Test
 
 open NUnit.Framework
+open System
 open Appendix.Math.Functions
 open Appendix.Math.Base
 open Appendix.Math.Matrixes
@@ -64,3 +65,14 @@ let checkApplicationsOf2x2Mat () =
     let det = Applications.determinantOperator.Compute mat
 
     Assert.Pass $"perm(A) = {perm}\r\ndet(A) = {det}"
+
+[<Test>]
+let checkNullityOf () =
+    let matrix = array2D [[1.0; 2.0; 3.0]; [4.0; 5.0; 6.0]; [0.0; 0.0; 0.0]]
+    let steps = Applications.kernelOperator.Steps matrix
+    let solution = Applications.kernelOperator.Result steps
+    let latex = Applications.kernelOperator.ToString steps "A"
+
+    //printfn "Решение: %A" solution
+    printfn "%A" solution
+    Assert.Pass latex

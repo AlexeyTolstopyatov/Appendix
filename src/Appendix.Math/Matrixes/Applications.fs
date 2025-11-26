@@ -160,3 +160,188 @@ let traceOperator : MathOperator<double[,], double> = {
     Symbol = fun name -> $@"\text{{ tr }}{name}"
     Declare = @"\text{tr} : \mathbb{R}^{n \product n} \to \mathbb{R}"
 }
+/// Nullity (kernel set) resolving in this library is
+/// a step-by-step solution.
+type KernelStep =
+    | InitialMatrix of double[,]
+    | RowReduction of double[,] * string
+    | BasisIdentification of double[][] * string[]
+    | FinalBasis of double[][]
+
+type KernelSolution = {
+    Basis: double[][]
+    Nullity: int
+    FreeVariables: string[]
+}
+
+let private matrixToString (matrix: double[,]) = 
+    let rows = matrix.GetLength(0)
+    let cols = matrix.GetLength(1)
+    let elements = 
+        [ for i in 0..rows-1 do
+            [ for j in 0..cols-1 -> sprintf "%.2f" matrix.[i,j] ]
+            |> String.concat " & "
+        ]
+    $"""\begin{{pmatrix}}{String.concat " \\\\\n" elements}\end{{pmatrix}}"""
+
+let private vectorToString (vector: double[]) =
+    let elements = vector |> Array.map (sprintf "%.2f") |> String.concat " \\\\ "
+    $"""\begin{{pmatrix}} {elements} \end{{pmatrix}}"""
+
+/// Rows echelon
+let private makeRowsEchelon (matrix: double[,]) : double[,] * int[] =
+    let epsilon = 1e-10
+    let m = matrix.GetLength 0
+    let n = matrix.GetLength 1
+    let mat = Array2D.copy matrix
+    let pivotCols = ResizeArray<int>()
+    let mutable r = 0
+    
+    for c in 0..n-1 do
+        if r >= m then () else
+        // Find zeroed element
+        let mutable pivotRow = r
+        while pivotRow < m && abs(mat.[pivotRow, c]) < epsilon do
+            pivotRow <- pivotRow + 1
+        
+        if pivotRow < m then
+            // replace rows
+            if pivotRow <> r then
+                for j in 0..n-1 do
+                    let temp = mat.[pivotRow, j]
+                    mat.[pivotRow, j] <- mat.[r, j]
+                    mat.[r, j] <- temp
+            
+            let pivot = mat.[r, c]
+            for j in 0..n-1 do
+                mat.[r, j] <- mat.[r, j] / pivot
+            
+            // make other members --> zeroes
+            for i in 0..m-1 do
+                if i <> r then
+                    let factor = mat.[i, c]
+                    for j in 0..n-1 do
+                        mat.[i, j] <- mat.[i, j] - factor * mat.[r, j]
+            
+            pivotCols.Add(c)
+            r <- r + 1
+    
+    mat, pivotCols.ToArray()
+
+let private computeKernel (matrix: double[,]) : KernelStep list * KernelSolution =
+    let m = matrix.GetLength 0
+    let n = matrix.GetLength 1
+    
+    // 
+    let rowsEchelon, pivotCols = makeRowsEchelon matrix
+    
+    // variables what are will be freed 
+    let pivotSet = Set.ofArray pivotCols
+    let freeCols = 
+        [0..n-1] 
+        |> List.filter (fun j -> not (pivotSet.Contains j))
+    
+    // basis?
+    // little warning: I want to see academic look at the situation.
+    // epsilon in this function strongly fixed and equal 10^(-5).
+    let basis =
+        freeCols
+        |> List.map (fun freeCol ->
+            let vector = Array.zeroCreate n
+            vector.[freeCol] <- 1.0  // free var := 1
+            
+            // x_1 = t_1 + 2t_2 + ... + nt_n 
+            let mutable currentPivot = 0
+            for row in 0..m-1 do
+                // skip zeroed rows
+                let mutable isZeroRow = true
+                for col in 0..n-1 do
+                    if abs(rowsEchelon.[row, col]) > 1e-5 then
+                        isZeroRow <- false
+                        // break;        
+
+                if isZeroRow then () else
+                
+                let pivotCol = pivotCols.[currentPivot]
+                vector.[pivotCol] <- -rowsEchelon.[row, freeCol]
+                currentPivot <- currentPivot + 1
+            vector
+        )
+        |> List.toArray
+    
+    // Names of free variables in system
+    let freeVars = freeCols 
+                    |> List.mapi (fun i _ -> $"t_{i + 1}") 
+                    |> List.toArray
+    
+    let solution = {
+        Basis = basis
+        Nullity = basis.Length
+        FreeVariables = freeVars
+    }
+    
+    // define steps
+    let steps = [
+        InitialMatrix matrix
+        RowReduction (rowsEchelon, "Current reduced rows echelon")
+        BasisIdentification (basis, freeVars)
+        FinalBasis basis
+    ]
+    
+    steps, solution
+/// In mathematics, the kernel of a linear map, also known as the null space or nullspace, 
+/// is the part of the domain which is mapped to the zero vector of the co-domain; 
+/// the kernel is always a linear subspace of the domain. That is, given a linear map L : V → W 
+/// between two vector spaces V and W, the kernel of L is the vector space of all elements v of V 
+/// such that L(v) = 0, where 0 denotes the zero vector in W, or more symbolically:
+[<CompiledName "KernelOperator">]
+let kernelOperator : SymbolicMathOperator<double[,], KernelStep, KernelSolution> = {
+    Steps = fun matrix -> 
+        let steps, _ = computeKernel matrix
+        steps
+    
+    Result = fun steps ->
+        let basis = 
+            match steps |> List.last with
+            | FinalBasis b -> b
+            | _ -> failwith "Last step is not FinalBasis"
+        let freeVars =
+            steps
+            |> List.tryPick (function 
+                | BasisIdentification (_, freeVars) -> Some freeVars
+                | _ -> None)
+            |> Option.defaultWith (fun () -> [||])
+
+        { Basis = basis; Nullity = basis.Length; FreeVariables = freeVars }
+    
+    ToString = fun steps name ->
+        let stepTexts = 
+            steps 
+            |> List.map (fun step ->
+                match step with
+                | InitialMatrix m -> 
+                    $@"{name} = {matrixToString m}"
+                
+                | RowReduction (m, desc) -> 
+                    $@"{{\text{{{desc}}}}} {matrixToString m}"
+                
+                | BasisIdentification (vectors, vars) ->
+                    let basisText = 
+                        vectors 
+                        |> Array.mapi (fun i v ->
+                            $@"\vec{{v_{{{i + 1}}} = {vectorToString v}")
+                        |> String.concat ",\\quad "
+                    $"\\text{{Basis of \\text{{Mat}}{name}}}: \n{basisText}"
+                
+                | FinalBasis basis ->
+                    let basisLatex = 
+                        basis 
+                        |> Array.mapi (fun i vec ->
+                            $@"\beta_{{{i + 1}}} \cdot {vectorToString vec}")
+                        |> String.concat " + "
+                    $@"\ker({name}) = \left\{{ {basisLatex} \mid t_i \in \mathbb{{R}} \right\}}"
+            )
+        String.concat " \\\\ \n" stepTexts
+    
+    Declare = @"\ker : \mathbb{R}^{m \times n} \to \mathbb{R}^n"
+}

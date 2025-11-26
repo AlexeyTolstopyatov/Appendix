@@ -4,9 +4,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Base\AxExpresstion.fs" />
-    <Compile Include="Base\AbstractMathOperator.fs" />
-    <Compile Include="Base\AxAbstractSymbolicOperator.fs" />
+    <Compile Include="Base\MathOperator.fs" />
+    <Compile Include="Base\SymbolicExpression.fs" />
+    <Compile Include="Base\SymbolicOperator.fs" />
     <Compile Include="Functions\AxDifferentiation.fs" />
     <Compile Include="Functions\AxIndefiniteIntegration.fs" />
     <Compile Include="Functions\Applications.fs" />

@@ -2,7 +2,7 @@
 open Appendix.Math.Base
 
 module AxIndefiniteIntegration =
-    let rec define(x:string, expr: AxExpression): AxExpression =
+    let rec define(x:string, expr: SymbolicExpression): SymbolicExpression =
         match expr with
         | Number _ -> Number 0.0
         
