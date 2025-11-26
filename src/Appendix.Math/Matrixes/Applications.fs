@@ -352,13 +352,18 @@ type ImageSolution = {
     Rank: int
     Dimension: int
 }
-
 let private vectorsToString (vectors: double[][]) =
     vectors 
     |> Array.mapi (fun i vec -> $@"c_{i + 1} = {vectorToString vec}")
     |> String.concat ",\\quad "
-
-// (Image/Column Space)
+/// Image (also known as range) is a concept in linear algebra 
+/// that refers to the set of all vectors that are the result 
+/// of a linear transformation (mapping). 
+/// 
+/// This concept is related to the fact that a linear transformation 
+/// preserves linear combinations of vectors, meaning it preserves the way 
+/// vectors are added and multiplied by scalars 
+/// from the original vector to the transformed vector.
 [<CompiledName "ImageOperator">]
 let imageOperator : SymbolicMathOperator<double[,], ImageStep, ImageSolution> = {
     Steps = fun matrix ->
