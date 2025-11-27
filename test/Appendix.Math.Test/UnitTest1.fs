@@ -1,8 +1,6 @@
 module Appendix.Math.Test
 
 open NUnit.Framework
-open System
-open Appendix.Math.Functions
 open Appendix.Math.Base
 open Appendix.Math.Matrixes
 
@@ -16,13 +14,13 @@ let Setup () =
 ///  
 [<Test>]
 let checkDerivativePolinomialFunctions () =
-    let x = Variable "x"
-    let f = (Power (x, Number 3.0), Multiply(x, Variable "a"))
-                    |> Add
-                    |> AxDifferentiation.define "x"
-                    |> AxDifferentiation.simplify
-                    |> AxStringify.toString
-    Assert.Pass(f) 
+    let expr = (Power(Variable "x", Number 3), Ln(Variable "x"))
+                |> Add
+    let steps = Functions.Applications.differentiationOperator.Steps (expr, "x")
+                |> Functions.Applications.differentiationOperator.Result
+                |> AxStringify.texString
+    
+    Assert.Pass($"{steps}") 
 ///
 /// Get the derivative function df(x)/dx from
 /// parts of sum which are different nature
@@ -34,14 +32,23 @@ let checkDerivativeOfDifferentAlgebraicFunctions () =
     let mother = (Power (x, Number 3.0), Sin x)
                     |> Add
                     |> AxStringify.toString
-    let daughter = (Power (x, Number 3.0), Sin x)
-                    |> Add
-                    |> AxDifferentiation.define "x" // explicit set "dx"
-                    |> AxDifferentiation.simplify
-                    |> AxStringify.toString
-                 // |> Console.WriteLine
+    
+    let daughter =
+        Functions.Applications.differentiationOperator.Steps (Add((Power (x, Number 3.0), Sin x)), "x")
+        |> Functions.Applications.differentiationOperator.Result
+        |> AxStringify.toString
     
     Assert.Pass $"{mother}\r\n{daughter}"
+
+[<Test>]
+let checkIndefiniteIntegration () =
+    let x = Variable "x"
+    let daughter =
+        Functions.Applications.integrationOperator.Steps (Add((Power (x, Number 3.0), Sin x)), "x")
+        |> Functions.Applications.integrationOperator.Result
+        |> AxStringify.texString
+        
+    Assert.Pass daughter
 
 [<Test>]
 let checkPermanentOf2x2E () = 
@@ -74,7 +81,7 @@ let checkNullityOf () =
     let solution = Applications.kernelOperator.Result steps
     let latex = Applications.kernelOperator.ToString steps "A"
     
-    printfn "%A" solution
+    printfn $"%A{solution}"
     Assert.Pass latex
 
 [<Test>]
@@ -85,7 +92,7 @@ let checkImageOf () =
     let solution = Applications.imageOperator.Result steps
     let latex = Applications.imageOperator.ToString steps "A"
     
-    printfn "%A" solution
+    printfn $"%A{solution}"
     Assert.Pass latex
 
 [<Test>]
@@ -99,5 +106,5 @@ let checkUndefinedNullity () =
     let solution = Applications.kernelOperator.Result steps
     let latex = Applications.kernelOperator.ToString steps "A"
 
-    printfn "%A" solution
+    printfn $"%A{solution}"
     Assert.Pass latex

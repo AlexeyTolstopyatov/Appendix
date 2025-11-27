@@ -7,10 +7,8 @@
     <Compile Include="Base\MathOperator.fs" />
     <Compile Include="Base\SymbolicExpression.fs" />
     <Compile Include="Base\SymbolicOperator.fs" />
-    <Compile Include="Functions\AxDifferentiation.fs" />
-    <Compile Include="Functions\AxIndefiniteIntegration.fs" />
+    <Compile Include="Functions\Differentiation.fs" />
     <Compile Include="Functions\Applications.fs" />
     <Compile Include="Matrixes\Applications.fs" />
-    <Compile Include="AxStringify.fs" />
   </ItemGroup>
 </Project>

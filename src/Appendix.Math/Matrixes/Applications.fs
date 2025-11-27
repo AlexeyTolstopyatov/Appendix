@@ -9,7 +9,7 @@ open System.Threading.Tasks
 //      - nullity (kernel set) definition
 // All this operator applies to one-object.
 // In other words I define it like Functions because
-// operator means by itselves something between two or more operands
+// operator means by itself something between two or more operands
 // but default once-argument function applies to one operand/object 
 /// In mathematics, the determinant is a scalar-valued function of the entries of a square matrix. 
 /// The determinant of a matrix A is commonly denoted det(A), det A, or |A|. 
@@ -113,7 +113,6 @@ let permanentOperator : MathOperator<double[,], double> = {
                 |> List.map (fun col ->
                     let minor = getMinor mat 0 col
                     async {
-                        let sign = if col % 2 = 0 then 1.0 else -1.0
                         let detMinor = per minor
                         return mat[0, col] * detMinor // <-- sign check question
                     })
@@ -179,7 +178,7 @@ let private matrixToString (matrix: double[,]) =
     let cols = matrix.GetLength(1)
     let elements = 
         [ for i in 0..rows-1 do
-            [ for j in 0..cols-1 -> sprintf "%.2f" matrix.[i,j] ]
+            [ for j in 0..cols-1 -> $"%.2f{matrix[i,j]}" ]
             |> String.concat " & "
         ]
     $"""\begin{{pmatrix}}{String.concat " \\\\\n" elements}\end{{pmatrix}}"""
@@ -201,27 +200,27 @@ let private makeRowsEchelon (matrix: double[,]) : double[,] * int[] =
         if r >= m then () else
         // Find zeroed element
         let mutable pivotRow = r
-        while pivotRow < m && abs(mat.[pivotRow, c]) < epsilon do
+        while pivotRow < m && abs(mat[pivotRow, c]) < epsilon do
             pivotRow <- pivotRow + 1
         
         if pivotRow < m then
             // replace rows
             if pivotRow <> r then
                 for j in 0..n-1 do
-                    let temp = mat.[pivotRow, j]
-                    mat.[pivotRow, j] <- mat.[r, j]
-                    mat.[r, j] <- temp
+                    let temp = mat[pivotRow, j]
+                    mat[pivotRow, j] <- mat[r, j]
+                    mat[r, j] <- temp
             
-            let pivot = mat.[r, c]
+            let pivot = mat[r, c]
             for j in 0..n-1 do
-                mat.[r, j] <- mat.[r, j] / pivot
+                mat[r, j] <- mat[r, j] / pivot
             
             // make other members --> zeroes
             for i in 0..m-1 do
                 if i <> r then
-                    let factor = mat.[i, c]
+                    let factor = mat[i, c]
                     for j in 0..n-1 do
-                        mat.[i, j] <- mat.[i, j] - factor * mat.[r, j]
+                        mat[i, j] <- mat[i, j] - factor * mat[r, j]
             
             pivotCols.Add(c)
             r <- r + 1
@@ -234,7 +233,7 @@ let private computeKernel (matrix: double[,]) : KernelStep list * KernelSolution
 
     let rowsEchelon, pivotCols = makeRowsEchelon matrix
     
-    // variables what are will be freed 
+    // variables what will be freed 
     let pivotSet = Set.ofArray pivotCols
     let freeCols = 
         [0..n-1] 
@@ -247,7 +246,7 @@ let private computeKernel (matrix: double[,]) : KernelStep list * KernelSolution
         freeCols
         |> List.map (fun freeCol ->
             let vector = Array.zeroCreate n
-            vector.[freeCol] <- 1.0  // free var := 1
+            vector[freeCol] <- 1.0  // free var := 1
             
             // x_1 = t_1 + 2t_2 + ... + nt_n 
             let mutable currentPivot = 0
@@ -255,14 +254,14 @@ let private computeKernel (matrix: double[,]) : KernelStep list * KernelSolution
                 // skip zeroed rows
                 let mutable isZeroRow = true
                 for col in 0..n-1 do
-                    if abs(rowsEchelon.[row, col]) > 1e-5 then
+                    if abs(rowsEchelon[row, col]) > 1e-5 then
                         isZeroRow <- false
                         // break;        
 
                 if isZeroRow then () else
                 
-                let pivotCol = pivotCols.[currentPivot]
-                vector.[pivotCol] <- -rowsEchelon.[row, freeCol]
+                let pivotCol = pivotCols[currentPivot]
+                vector[pivotCol] <- -rowsEchelon[row, freeCol]
                 currentPivot <- currentPivot + 1
             vector
         )
@@ -321,7 +320,7 @@ let kernelOperator : SymbolicMathOperator<double[,], KernelStep, KernelSolution>
                 match step with
                 | InitialMatrix m -> $@"{name} = {matrixToString m}"
                 | RowReduction (m, desc) -> $@"\text{{ {desc} }} {matrixToString m}"
-                | BasisIdentification (vectors, vars) ->
+                | BasisIdentification (vectors, _) ->
                     let basisText = 
                         vectors 
                         |> Array.mapi (fun i v ->
@@ -369,11 +368,11 @@ let imageOperator : SymbolicMathOperator<double[,], ImageStep, ImageSolution> = 
     Steps = fun matrix ->
         let m = matrix.GetLength(0)
         
-        let rrefMatrix, pivotCols = makeRowsEchelon matrix
+        let _, pivotCols = makeRowsEchelon matrix
         
         let basis = pivotCols
                     |> Array.map (fun colIdx ->
-                        Array.init m (fun row -> matrix.[row, colIdx])
+                        Array.init m (fun row -> matrix[row, colIdx])
                     )
         
         [

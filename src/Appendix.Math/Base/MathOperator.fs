@@ -7,7 +7,7 @@ namespace Appendix.Math.Base
 // License: MIT
 /// This is a numeric|computable operator type.
 /// MathOperator can work only if target result and
-/// mathematic object already represents as "value".
+/// mathematical object already represents as "value".
 /// 
 /// This means next: 
 /// If you want to see result of computation what can be
